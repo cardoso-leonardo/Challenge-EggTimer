@@ -8,41 +8,69 @@
 //
 
 import UIKit
+import AVFoundation
 
 class ViewController: UIViewController {
     
-    @IBOutlet weak var secondsLabel: UILabel!
-    var eggTimes : [String : Int] = ["Soft": 5, "Medium": 7, "Hard": 12]
-    var counter = 60
+// MARK: Declarando
+    @IBOutlet weak var titleLabel: UILabel!
+    @IBOutlet weak var progressBar: UIProgressView!
+    var eggTimes : [String : Int] = ["Soft": 3, "Medium": 4, "Hard": 5]
+    var totalTime = 0
+    var secondsPassed = 0
     var timer = Timer()
+    var player : AVAudioPlayer!
+    let audioFile : String = "alarm_sound"
     
-//MARK: DidLoad
+    
+//MARK: Funções
     override func viewDidLoad() {
-        timer.invalidate()
         super.viewDidLoad()
+        timer.invalidate()
+        progressBar.progress = 0.0
         //        eggTimes["Teste"] = 99999
         //        print(eggTimes)
         //        print(eggTimes.keys)
         //        print(eggTimes.values)
         //        print(eggTimes["Soft"]!)
+      
     }
     
     @objc func updateCounter() {
-        if counter > 0 {
-            secondsLabel.text = ("\(counter) segundos")
-            print("\(counter) seconds")
-            counter -= 1
+        if secondsPassed < totalTime {
+            secondsPassed += 1
+            progressBar.progress = Float(secondsPassed) / Float(totalTime)
+        } else {
+            titleLabel.text = ("DONE!")
+            playSound(soundName: audioFile)
+            timer.invalidate()
         }
     }
     
-//MARK: IBAction
+
     @IBAction func hardnessSelected(_ sender: UIButton) {
-        timer.invalidate()
         let hardness = sender.currentTitle!
-        counter = eggTimes[hardness]!*60
+        progressBar.progress = 0.0
+        secondsPassed = 0
+        titleLabel.text = hardness
+        timer.invalidate()
+        totalTime = eggTimes[hardness]!
         timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(updateCounter), userInfo: nil, repeats: true)
     }
+    
+    func playSound(soundName : String) {
+        let url = Bundle.main.url(forResource: soundName, withExtension: "mp3")
+        player = try! AVAudioPlayer(contentsOf: url!)
+        player.play()
+    }
 }
+
+
+
+
+
+
+
 
 
 
